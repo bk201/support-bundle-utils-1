@@ -10,6 +10,12 @@ const (
 	StateError       = "error"
 	StateReady       = "ready"
 
+	PhaseInit          = "start"
+	PhaseClusterBundle = "cluster"
+	PhaseNodeBundle    = "node"
+	PhasePackaging     = "packaging"
+	PhaseDone          = "done"
+
 	HarvesterNodeLabelKey   = "harvesterhci.io/managed"
 	HarvesterNodeLabelValue = "true"
 	SupportBundleLabelKey   = "harvesterhci.io/supportbundle"
@@ -37,7 +43,12 @@ type StateStoreInterface interface {
 
 	GetState(namespace, supportbundle string) (string, error)
 
-	Done(namespace, supportbundle, filename string, filesize int64) error
+	// Done(namespace, supportbundle, filename string, filesize int64) error
 
-	SetError(namespace, supportbundle string, er error) error
+	// SetError(namespace, supportbundle string, er error) error
+}
+
+type Phase struct {
+	Name string
+	Run  func() error
 }
