@@ -33,4 +33,10 @@ type ManagerStatus struct {
 
 	// progress of the bundle collecting. 0 - 100.
 	Progress int
+
+	// bundle filename
+	Filename string
+
+	// bundle filesize
+	Filesize int64
 }

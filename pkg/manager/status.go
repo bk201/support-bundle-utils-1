@@ -29,3 +29,10 @@ func (s *ManagerStatus) SetProgress(progress int) {
 	defer s.Unlock()
 	s.Progress = progress
 }
+
+func (s *ManagerStatus) SetFileinfo(filename string, filesize int64) {
+	s.Lock()
+	defer s.Unlock()
+	s.Filename = filename
+	s.Filesize = filesize
+}

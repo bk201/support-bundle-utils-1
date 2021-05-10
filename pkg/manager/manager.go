@@ -23,8 +23,7 @@ type SupportBundleManager struct {
 	HarvesterNamespace string
 	HarvesterVersion   string
 	BundleName         string
-	BundleFileName     string
-	bundleFileSize     int64
+	bundleFileName     string
 	OutputDir          string
 	WaitTimeout        time.Duration
 	LonghornAPI        string
@@ -79,7 +78,7 @@ func (m *SupportBundleManager) getWorkingDir() string {
 }
 
 func (m *SupportBundleManager) getBundlefile() string {
-	return filepath.Join(m.OutputDir, m.BundleFileName)
+	return filepath.Join(m.OutputDir, m.bundleFileName)
 }
 
 func (m *SupportBundleManager) getBundlefilesize() (int64, error) {
@@ -174,7 +173,7 @@ func (m *SupportBundleManager) phaseCollectClusterBundle() error {
 	if err != nil {
 		return errors.Wrap(err, "fail to generate cluster bundle")
 	}
-	m.BundleFileName = bundleName
+	m.bundleFileName = bundleName
 	return nil
 }
 
@@ -293,7 +292,7 @@ func (m *SupportBundleManager) completeNode(node string) {
 }
 
 func (m *SupportBundleManager) compressBundle() error {
-	bundleDir := strings.TrimSuffix(m.BundleFileName, filepath.Ext(m.getBundlefile()))
+	bundleDir := strings.TrimSuffix(m.bundleFileName, filepath.Ext(m.getBundlefile()))
 	bundleDirPath := filepath.Join(m.OutputDir, bundleDir)
 	err := os.Rename(m.getWorkingDir(), bundleDirPath)
 	if err != nil {
@@ -310,7 +309,7 @@ func (m *SupportBundleManager) compressBundle() error {
 	if err != nil {
 		return errors.Wrap(err, "fail to get bundle file size")
 	}
-	m.bundleFileSize = size
+	m.status.SetFileinfo(m.bundleFileName, size)
 	return nil
 }
 
