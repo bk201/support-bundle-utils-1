@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/harvester/harvester/pkg/controller/master/supportbundle/types"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/rest"
@@ -91,7 +92,10 @@ func (m *SupportBundleManager) getBundlefilesize() (int64, error) {
 
 func (m *SupportBundleManager) Run() error {
 	m.status = &ManagerStatus{}
-	phases := []Phase{
+	phases := []struct {
+		Name string
+		Run  func() error
+	}{
 		{
 			PhaseInit,
 			m.phaseInit,
@@ -147,7 +151,7 @@ func (m *SupportBundleManager) phaseInit() error {
 	if err != nil {
 		return err
 	}
-	if state != StateGenerating {
+	if state != types.StateGenerating {
 		return fmt.Errorf("invalid start state %s", state)
 	}
 
@@ -311,7 +315,7 @@ func (m *SupportBundleManager) compressBundle() error {
 }
 
 func (m *SupportBundleManager) refreshHarvesterNodes() error {
-	nodes, err := m.k8s.GetNodesListByLabels(fmt.Sprintf("%s=%s", HarvesterNodeLabelKey, HarvesterNodeLabelValue))
+	nodes, err := m.k8s.GetNodesListByLabels(fmt.Sprintf("%s=%s", types.HarvesterNodeLabelKey, types.HarvesterNodeLabelValue))
 	if err != nil {
 		return err
 	}

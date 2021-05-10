@@ -23,11 +23,3 @@ func (s *K8sStore) GetSupportBundle(namespace, supportbundle string) (*harvester
 func (s *K8sStore) GetState(namespace, supportbundle string) (string, error) {
 	return s.client.GetSupportBundleState(namespace, supportbundle)
 }
-
-func (s *K8sStore) Done(namespace, supportbundle, filename string, filesize int64) error {
-	return s.client.UpdateSupportBundleStatus2(namespace, supportbundle, StateReady, filename, filesize)
-}
-
-func (s *K8sStore) SetError(namespace, supportbundle string, er error) (err error) {
-	return s.client.SetSupportBundleError(namespace, supportbundle, StateError, er.Error())
-}

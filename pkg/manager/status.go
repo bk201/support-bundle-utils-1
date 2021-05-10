@@ -1,19 +1,13 @@
 package manager
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/harvester/harvester/pkg/controller/master/supportbundle/types"
+)
 
 type ManagerStatus struct {
-	// phase to collect bundle
-	Phase string
-
-	// fail to collect bundle
-	Error bool
-
-	// error message
-	ErrorMessage string
-
-	// progress of the bundle collecting. 0 - 100.
-	Progress int
+	types.ManagerStatus
 
 	lock sync.RWMutex
 }

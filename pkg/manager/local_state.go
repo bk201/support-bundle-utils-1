@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	harvesterv1 "github.com/harvester/harvester/pkg/apis/harvesterhci.io/v1beta1"
+	"github.com/harvester/harvester/pkg/controller/master/supportbundle/types"
 	"github.com/sirupsen/logrus"
 )
 
@@ -16,7 +17,7 @@ func NewLocalStore(namespace, supportbundle string) *LocalStore {
 	sbs := map[string]*harvesterv1.SupportBundle{
 		getSupportBundleKey(namespace, supportbundle): {
 			Status: harvesterv1.SupportBundleStatus{
-				State: StateGenerating,
+				State: types.StateGenerating,
 			},
 		},
 	}
@@ -50,24 +51,4 @@ func (s *LocalStore) GetState(namespace, supportbundle string) (string, error) {
 	}
 	logrus.Debugf("Get supportbundle %s/%s state %s", namespace, supportbundle, sb.Status.State)
 	return sb.Status.State, nil
-}
-
-func (s *LocalStore) Done(namespace, supportbundle, filename string, filesize int64) error {
-	sb, err := s.getSb(namespace, supportbundle)
-	if err != nil {
-		return err
-	}
-	logrus.Debugf("Mark supportbundle %s/%s done", namespace, supportbundle)
-	sb.Status.State = StateReady
-	return nil
-}
-
-func (s *LocalStore) SetError(namespace, supportbundle string, er error) (err error) {
-	sb, err := s.getSb(namespace, supportbundle)
-	if err != nil {
-		return err
-	}
-	logrus.Debugf("Mark supportbundle %s/%s error", namespace, supportbundle)
-	sb.Status.State = StateError
-	return nil
 }
