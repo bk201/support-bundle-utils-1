@@ -23,8 +23,8 @@ type HttpServer struct {
 }
 
 func (s *HttpServer) getStatus(w http.ResponseWriter, req *http.Request) {
-	s.manager.status.lock.RLock()
-	defer s.manager.status.lock.RUnlock()
+	s.manager.status.RLock()
+	defer s.manager.status.RUnlock()
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(s.manager.status)
 	if err != nil {
