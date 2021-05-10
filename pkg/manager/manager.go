@@ -40,7 +40,7 @@ type SupportBundleManager struct {
 	harvester  *client.HarvesterClient
 
 	state  StateStoreInterface
-	status *ManagerStatus
+	status ManagerStatus
 
 	ch            chan struct{}
 	done          bool
@@ -90,7 +90,6 @@ func (m *SupportBundleManager) getBundlefilesize() (int64, error) {
 }
 
 func (m *SupportBundleManager) Run() error {
-	m.status = &ManagerStatus{}
 	phases := []struct {
 		Name string
 		Run  func() error
