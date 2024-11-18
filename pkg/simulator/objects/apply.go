@@ -60,7 +60,11 @@ var (
 // NewObjectManager is a wrapper around apply and support bundle path
 func NewObjectManager(ctx context.Context, config *rest.Config, path string) (*ObjectManager, error) {
 
-	dclient, err := dynamic.NewForConfig(config)
+	// create a dynamic client with relaxed QPS and burst limits
+	relaxConfig := rest.CopyConfig(config)
+	relaxConfig.Burst = 10000
+	relaxConfig.QPS = 10000
+	dclient, err := dynamic.NewForConfig(relaxConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -93,6 +97,11 @@ func (o *ObjectManager) CreateUnstructuredClusterObjects() error {
 	if err != nil {
 		return err
 	}
+
+	// TODO: check all CRDs are created
+	logrus.Info("Sleeping for 5 seconds before applying cluster objects")
+	time.Sleep(5 * time.Second)
+	logrus.Info("Sleeping done")
 
 	progressMgr = NewProgressManager("Step 1/4: Cluster objects")
 	err = o.ApplyObjects(clusterObjs, true, nil, progressMgr.progress)

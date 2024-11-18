@@ -8,13 +8,11 @@ import (
 	"time"
 
 	"github.com/mitchellh/go-homedir"
+	wranglerunstructured "github.com/rancher/wrangler/pkg/unstructured"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
-
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-
-	wranglerunstructured "github.com/rancher/wrangler/pkg/unstructured"
 
 	"github.com/rancher/support-bundle-kit/pkg/simulator/apiserver"
 	"github.com/rancher/support-bundle-kit/pkg/simulator/certs"
@@ -105,6 +103,7 @@ support bundle contents using native k8s tooling like kubectl`,
 		}
 
 		if !skipLoad {
+			start := time.Now()
 			err = o.CreateUnstructuredClusterObjects()
 
 			if err != nil {
@@ -124,6 +123,8 @@ support bundle contents using native k8s tooling like kubectl`,
 			// ignore the error creation
 			_ = o.CreatedFailedObjectsList()
 			logrus.Info("All resources loaded successfully")
+
+			logrus.Infof("Time to load all objects: %s seconds", time.Since(start))
 		}
 
 		err = eg.Wait()
