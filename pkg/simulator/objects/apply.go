@@ -3,6 +3,7 @@ package objects
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	wranglerunstructured "github.com/rancher/wrangler/pkg/unstructured"
@@ -54,7 +55,8 @@ var (
 		"PodSecurityPolicy": true,
 	}
 
-	cacheMap = make(map[schema.GroupVersionKind]*meta.RESTMapping)
+	cacheMap  = make(map[schema.GroupVersionKind]*meta.RESTMapping)
+	cacheLock = new(sync.Mutex)
 )
 
 // NewObjectManager is a wrapper around apply and support bundle path
@@ -280,6 +282,8 @@ func objectHousekeeping(obj *unstructured.Unstructured) error {
 // wrapper to lookup GVR for usage with dynamic client
 func findGVR(gvk schema.GroupVersionKind, cfg *rest.Config) (*meta.RESTMapping, error) {
 
+	cacheLock.Lock()
+	defer cacheLock.Unlock()
 	existingMapping, ok := cacheMap[gvk]
 	if ok {
 		return existingMapping, nil
