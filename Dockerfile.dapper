@@ -16,7 +16,7 @@ RUN curl -sSfL https://github.com/docker/buildx/releases/download/v0.14.1/buildx
     mv buildx-v0.14.1.linux-${ARCH} /usr/local/bin/buildx
 
 # -- for dapper
-ENV DAPPER_RUN_ARGS --privileged --network host -v /run/containerd/containerd.sock:/run/containerd/containerd.sock
+ENV DAPPER_RUN_ARGS --privileged --network host -v /run/containerd/containerd.sock:/run/containerd/containerd.sock -v sbk-go-cache:/root/.cache/go-build
 ENV GO111MODULE off
 ENV DAPPER_ENV REPO TAG DRONE_TAG
 ENV DAPPER_DOCKER_SOCKET true
