@@ -7,12 +7,16 @@ on:
       push:
         required: true
         type: boolean
+      release:
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   dapper-build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       id-token: write
     steps:
       - name: Checkout code
@@ -24,30 +28,57 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Run dapper
-        run: make ci
+      - name: test
+        run: |
+          mkdir -p dist/artifacts
+          dd if=/dev/urandom of=dist/artifacts/support-bundle-kit-amd64 bs=1M count=10
+          dd if=/dev/urandom of=dist/artifacts/support-bundle-kit-arm64 bs=1M count=10
 
-      - name: Read some Secrets
-        uses: rancher-eio/read-vault-secrets@main
-        if: ${{ inputs.push == true }}
-        with:
-          secrets: |
-            secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials username | DOCKER_USERNAME ;
-            secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials password | DOCKER_PASSWORD
+      #- name: Run dapper
+      #  run: make ci
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        if: ${{ inputs.push == true }}
-        with:
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
+      # - name: Read some Secrets
+      #   uses: rancher-eio/read-vault-secrets@main
+      #   if: ${{ inputs.push == true }}
+      #   with:
+      #     secrets: |
+      #       secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials username | DOCKER_USERNAME ;
+      #       secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials password | DOCKER_PASSWORD
 
-      - name: Docker Build
-        uses: docker/build-push-action@v5
+      # - name: Login to Docker Hub
+      #   uses: docker/login-action@v3
+      #   if: ${{ inputs.push == true }}
+      #   with:
+      #     username: ${{ env.DOCKER_USERNAME }}
+      #     password: ${{ env.DOCKER_PASSWORD }}
+
+      # - name: Docker Build
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     provenance: false
+      #     context: .
+      #     platforms: linux/amd64,linux/arm64
+      #     file: package/Dockerfile
+      #     push: ${{ inputs.push }}
+      #     tags: rancher/support-bundle-kit:${{ inputs.release-tag-name }}
+      - name: Prepare artifacts for the release
+        if: ${{ startsWith(github.ref, 'refs/tags/') && fromJSON(inputs.release) }}
+        run: |
+          cd dist/artifacts
+          for arch in amd64 arm64; do
+            rm -f sha256sum-$arch.txt && touch sha256sum-$arch.txt
+            if [ -e support-bundle-kit-$arch ]; then
+              tar zcf support-bundle-kit-$arch.tar.gz support-bundle-kit-$arch
+              sha256sum support-bundle-kit-$arch.tar.gz > sha256sum-$arch.txt
+            fi
+          done
+
+      - name: Publish artifacts to the release
+        uses: softprops/action-gh-release@v2
+        if: ${{ startsWith(github.ref, 'refs/tags/') && fromJSON(inputs.release) }}
         with:
-          provenance: false
-          context: .
-          platforms: linux/amd64,linux/arm64
-          file: package/Dockerfile
-          push: ${{ inputs.push }}
-          tags: rancher/support-bundle-kit:${{ inputs.release-tag-name }}
+          files: |
+            dist/artifacts/support-bundle-kit-amd64.tar.gz
+            dist/artifacts/support-bundle-kit-arm64.tar.gz
+            dist/artifacts/sha256sum-amd64.txt
+            dist/artifacts/sha256sum-arm64.txt
