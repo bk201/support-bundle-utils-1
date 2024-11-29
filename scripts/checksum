@@ -1,0 +1,13 @@
+#!/bin/bash -e
+
+cd $(dirname $0)/..
+
+mkdir -p dist/artifacts
+cd dist/artifacts
+
+for arch in amd64 arm64; do
+  rm -f sha256sum-$arch.txt && touch sha256sum-$arch.txt
+  if [ -e support-bundle-kit-$arch ]; then
+    sha256sum support-bundle-kit-$arch > sha256sum-$arch.txt
+  fi
+done
