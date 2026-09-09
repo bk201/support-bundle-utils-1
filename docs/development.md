@@ -1,10 +1,12 @@
 # Development instructions
 
-The support-bundle-kit simulator functionality tweaks a few objects in the upstream k8s.io code based which is available in the vendor directory.
+The support-bundle-kit simulator patches a few upstream Kubernetes files in the vendor directory. The patch is stored in `patches/simulator.patch` and is applied automatically by `scripts/build`.
 
-The following instructions need to be followed to ensure that vendoring updates refactor these changes.
+After changing Go dependencies, run `go mod vendor` and then build normally. The build reapplies the simulator patch. If an upstream change makes a patch hunk incompatible, the build fails before compilation and asks for the patch to be refreshed.
 
-We have patched a few items in the code to allow the `simulator` functionality:
+To refresh the patch, start from the output of `go mod vendor`, make the simulator changes described below, and regenerate `patches/simulator.patch` from the vendor diff. Keep the committed vendor directory unpatched; the patch is the source of truth.
+
+The patch contains the following changes required by the `simulator` functionality:
 
 ## creationTimestamp support
 To ensure that the `creationTimestamp` is honored from the exported objects we have disabled the validation on `creationTimestamp` the following changes have been made:

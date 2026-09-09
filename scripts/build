@@ -3,6 +3,18 @@
 source $(dirname $0)/version
 cd $(dirname $0)/..
 
+SIMULATOR_PATCH="patches/simulator.patch"
+if git apply --reverse --check "$SIMULATOR_PATCH" >/dev/null 2>&1; then
+    echo "Simulator vendor patch is already applied"
+elif git apply --check "$SIMULATOR_PATCH"; then
+    echo "Applying simulator vendor patch"
+    git apply "$SIMULATOR_PATCH"
+    echo "Simulator vendor patch is applied"
+else
+    echo "ERROR: Simulator vendor patch no longer applies. Refresh $SIMULATOR_PATCH after updating dependencies." >&2
+    exit 1
+fi
+
 mkdir -p bin
 if [ "$(uname)" = "Linux" ]; then
     OTHER_LINKFLAGS="-extldflags -static -s"
